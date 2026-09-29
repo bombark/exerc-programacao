@@ -68,6 +68,7 @@ d) Salve os valores em um arquivo de texto (ex: `dados_seno.txt`) no formato:
 
 > **Exemplo de Comando no Gnuplot (via script ou chamada de sistema):**
 > ```bash
+> ./programa > dados_seno.txt
 > gnuplot -p -e "set title 'Aproximação do Seno (Taylor 5 termos)'; \
 >                set xlabel 'Angulo (Graus)'; set ylabel 'Valor'; \
 >                plot 'dados_seno.txt' using 1:2 with lines title 'Taylor 5 Termos', \
@@ -81,6 +82,3 @@ d) Salve os valores em um arquivo de texto (ex: `dados_seno.txt`) no formato:
 
 ---
 
-### Desafio Opcional
-
-Adicione uma terceira coluna ao arquivo de dados e plote também o **erro absoluto** (a diferença entre o seno real e o aproximado) em um gráfico secundário (usando `set multiplot` no Gnuplot). Como o erro se comporta ao longo dos 360 graus?

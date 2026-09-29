@@ -49,9 +49,9 @@ int main() {
     al_register_event_source(fila_eventos, al_get_timer_event_source(timer));
 
     // --- CARREGAR A IMAGEM DO PERSONAGEM ---
-    ALLEGRO_BITMAP* img_jogador = al_load_bitmap("personagem.jpg");
+    ALLEGRO_BITMAP* img_jogador = al_load_bitmap("personagem.png");
     if (!img_jogador) {
-        std::cerr << "Aviso: Nao foi possivel carregar 'personagem.jpg'. Usando quadrado vermelho padrao." << std::endl;
+        std::cerr << "Aviso: Nao foi possivel carregar 'personagem.png'. Usando quadrado vermelho padrao." << std::endl;
     }
 
     // 2. Inicialização do Jogador e Cenário
