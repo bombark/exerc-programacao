@@ -1,0 +1,88 @@
+#!/bin/python3
+
+import subprocess
+import os
+
+def selection_sort_reference(arr):
+    """Calcula o resultado esperado usando Selection Sort de referência."""
+    n = len(arr)
+    comps = 0
+    a = list(arr)
+    for i in range(n - 1):
+        min_idx = i
+        for j in range(i + 1, n):
+            comps += 1
+            if a[j] < a[min_idx]:
+                min_idx = j
+        a[i], a[min_idx] = a[min_idx], a[i]
+    return a, comps
+
+def run_tests():
+    cpp_file = "codigo.cpp"
+    exe_file = "main_exec"
+
+    # 1. Compilar o arquivo C++
+    print("[*] Compilando o arquivo C++...")
+    compile_result = subprocess.run(["g++", "-O3", cpp_file, "-o", exe_file], capture_output=True, text=True)
+    
+    if compile_result.returncode != 0:
+        print("[X] Erro de compilação:")
+        print(compile_result.stderr)
+        return
+
+    print("[+] Compilação bem-sucedida!\n[*] Executando testes...")
+
+    # 2. Definir casos de teste
+    test_cases = [
+        [23, 15, 42, 8, 15],
+        [5, 4, 3, 2, 1],
+        [1, 2, 3, 4, 5],
+        [42],
+        [10, 5, 20, 15, 30, 25],
+        [-3, 10, 0, -5, 7]
+    ]
+
+    passed = 0
+    for idx, tc in enumerate(test_cases, 1):
+        n = len(tc)
+        # Formatar a entrada no padrão exigido pelo exercício
+        input_str = f"{n}\n" + " ".join(map(str, tc)) + "\n"
+        
+        # Obter resposta de referência
+        sorted_ref, comps_ref = selection_sort_reference(tc)
+        expected_line1 = " ".join(map(str, sorted_ref))
+        expected_line2 = str(comps_ref)
+
+        # Executar o binário C++
+        try:
+            result = subprocess.run([f"./{exe_file}"], input=input_str, capture_output=True, text=True, timeout=3)
+            output_lines = result.stdout.strip().splitlines()
+            
+            if len(output_lines) >= 2:
+                got_line1 = output_lines[0].strip()
+                got_line2 = output_lines[1].strip()
+                
+                if got_line1 == expected_line1 and got_line2 == expected_line2:
+                    print(f"  -> Teste {idx}: PASSOU")
+                    passed += 1
+                else:
+                    print(f"  -> Teste {idx}: FALHOU")
+                    print(f"     Entrada:   {tc}")
+                    print(f"     Esperado:  [{expected_line1}] | Comparações: {expected_line2}")
+                    print(f"     Obtido:    [{got_line1}] | Comparações: {got_line2}")
+            else:
+                print(f"  -> Teste {idx}: FALHOU (Saída incompleta ou vazia)")
+                print(f"     Saída obtida: {repr(result.stdout)}")
+        except Exception as e:
+            print(f"  -> Teste {idx}: ERRO DE EXECUTAVEL ({e})")
+
+    # 3. Limpeza do executável gerado
+    if os.path.exists(exe_file):
+        os.remove(exe_file)
+
+    print("\n" + "="*30)
+    print(f"Resultado Final: {passed}/{len(test_cases)} testes passaram.")
+    print("="*30)
+
+if __name__ == "__main__":
+    run_tests()

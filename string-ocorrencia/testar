@@ -1,0 +1,76 @@
+#!/bin/python3
+
+import subprocess
+import os
+
+def reference_count(frase, letra):
+    """Calcula a contagem esperada (case-insensitive)."""
+    letra_alvo = letra.lower()
+    return sum(1 for c in frase if c.lower() == letra_alvo)
+
+def run_tests():
+    cpp_file = "codigo.cpp"
+    exe_file = "main_exec"
+
+    # 1. Compilar o arquivo C++
+    print("[*] Compilando o arquivo C++...")
+    compile_result = subprocess.run(["g++", "-O3", cpp_file, "-o", exe_file], capture_output=True, text=True)
+    
+    if compile_result.returncode != 0:
+        print("[X] Erro de compilação:")
+        print(compile_result.stderr)
+        return
+
+    print("[+] Compilação bem-sucedida!\n[*] Executando testes...")
+
+    # 2. Definir casos de teste (frase, letra_procurada)
+    test_cases = [
+        ("O rato roeu a roupa do rei de Roma", "r"),
+        ("Programacao em C++ e legal", "a"),
+        ("A aranha arranha a jarra", "A"), # Testando letra maiúscula na busca
+        ("Testando sem nenhuma ocorrencia", "z"),
+        ("1234567890", "5"),
+        ("AEIOU aeiou", "E")
+    ]
+
+    passed = 0
+    for idx, (frase, letra) in enumerate(test_cases, 1):
+        # Formatar a entrada no padrão exigido pelo exercício: frase na linha 1, letra na linha 2
+        input_str = f"{frase}\n{letra}\n"
+        
+        # Obter resposta de referência
+        esperado_qtd = reference_count(frase, letra)
+
+        # Executar o binário C++
+        try:
+            result = subprocess.run([f"./{exe_file}"], input=input_str, capture_output=True, text=True, timeout=3)
+            output_lines = result.stdout.strip().splitlines()
+            
+            if len(output_lines) >= 1:
+                got_output = output_lines[0].strip()
+                
+                # Verificamos se a saída contém o número correto gerado (procurando o número na string de saída)
+                # Isso aceita variações de texto desde que o número correto apareça
+                if str(esperado_qtd) in got_output:
+                    print(f"  -> Teste {idx}: PASSOU (Frase: '{frase}' | Letra: '{letra}')")
+                    passed += 1
+                else:
+                    print(f"  -> Teste {idx}: FALHOU")
+                    print(f"     Entrada:   Frase: '{frase}', Letra: '{letra}'")
+                    print(f"     Esperado conter o número: {esperado_qtd}")
+                    print(f"     Saída obtida: {repr(got_output)}")
+            else:
+                print(f"  -> Teste {idx}: FALHOU (Saída vazia)")
+        except Exception as e:
+            print(f"  -> Teste {idx}: ERRO DE EXECUÇÃO ({e})")
+
+    # 3. Limpeza do executável gerado
+    if os.path.exists(exe_file):
+        os.remove(exe_file)
+
+    print("\n" + "="*30)
+    print(f"Resultado Final: {passed}/{len(test_cases)} testes passaram.")
+    print("="*30)
+
+if __name__ == "__main__":
+    run_tests()
